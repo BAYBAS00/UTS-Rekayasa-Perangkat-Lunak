@@ -59,8 +59,7 @@ class DatabaseManager {
 $db1 = DatabaseManager::getInstance();
 $db2 = DatabaseManager::getInstance();
 
-// $db1 akan selalu sama dengan $db2
-```
+// $db1 akan selalu sama dengan $db2```
 
 - Factory Method: …
 - Builder: …
