@@ -37,54 +37,180 @@ Dengan adanya sistem koperasi simpan pinjam ini, diharapkan proses administrasi 
   AnggotaService tidak membuat dependency sendiri, tetapi menerima DatabaseManager dari luar, sehingga dependency bergantung pada abstraksi.
 
 ### Contoh Creational Design Patterns
-- Singleton:
-  ```php
+- Singleton
   
-class DatabaseManager {
-    private static $instance = null; // Penyimpan instance tunggal
+ ```php
+  
+CLASS DatabaseManager:
+    PRIVATE STATIC $instance = NULL // Penyimpan instance tunggal
+    
+    PRIVATE METHOD __construct()
+        // Kunci: Konstruktor harus private
+        // Inisialisasi koneksi DB (hanya sekali)
 
-    private function __construct() {
-        // Konstruktor harus private
-        // Inisialisasi koneksi database hanya sekali
+    PUBLIC STATIC METHOD getInstance()
+        IF $instance IS NULL THEN
+            $instance = NEW DatabaseManager() // Buat hanya jika belum ada
+        END IF
+        RETURN $instance // Selalu kembalikan instance yang sama
+
+// PENGGUNAAN:
+$db1 = DatabaseManager::getInstance()
+$db2 = DatabaseManager::getInstance() 
+// $db1 selalu sama dengan $db2
+
+```
+
+- Factory Method:
+
+```php
+
+// Produk Dasar: Antarmuka yang akan dibuat oleh Pabrik
+INTERFACE UserBase {
+    PUBLIC METHOD getRole(): string
+}
+
+// Produk Konkret 1
+CLASS UserAnggota IMPLEMENTS UserBase {
+    PUBLIC METHOD __construct(array $data) {
+        // Logika inisialisasi Anggota
+        $this->role = 'Anggota'
     }
+    PUBLIC METHOD getRole(): string { RETURN $this->role }
+}
 
-    public static function getInstance() {
-        if (self::$instance === null) {
-            self::$instance = new DatabaseManager(); // Buat instance jika belum ada
-        }
-        return self::$instance; // Selalu mengembalikan instance yang sama
+// Produk Konkret 2
+CLASS UserPengurus IMPLEMENTS UserBase {
+    PUBLIC METHOD __construct(array $data) {
+        // Logika inisialisasi Pengurus
+        $this->role = 'Pengurus'
+    }
+    PUBLIC METHOD getRole(): string { RETURN $this->role }
+}
+
+// Creator Abstrak (Pabrik Dasar)
+ABSTRACT CLASS UserFactory {
+    
+    // Factory Method: Harus diimplementasikan (di-override) oleh subclass
+    ABSTRACT PUBLIC METHOD createUser(array $data) : UserBase
+    
+    // Metode Klien: Logika umum yang menggunakan produk
+    PUBLIC METHOD loginUser(array $data) {
+        $user = $this->createUser($data) // PANGGILAN KUNCI: Minta produk dari subclass
+        
+        ECHO "User dengan peran " . $user->getRole() . " berhasil diverifikasi."
+        RETURN $user
     }
 }
 
-// Penggunaan:
-$db1 = DatabaseManager::getInstance();
-$db2 = DatabaseManager::getInstance();
+// Creator Konkret 1: Pabrik khusus Anggota
+CLASS AnggotaFactory EXTENDS UserFactory {
+    PUBLIC METHOD createUser(array $data) : UserBase {
+        // Pabrik ini menentukan objek mana yang dibuat
+        RETURN NEW UserAnggota($data) 
+    }
+}
 
-// $db1 akan selalu sama dengan $db2
+// Creator Konkret 2: Pabrik khusus Pengurus
+CLASS PengurusFactory EXTENDS UserFactory {
+    PUBLIC METHOD createUser(array $data) : UserBase {
+        // Pabrik ini menentukan objek mana yang dibuat
+        RETURN NEW UserPengurus($data)
+    }
+}
 
-  ```
+```
 
-- Factory Method: …
-- Builder: …
+- Builder:
 
-## 5. Proses Penting & Diagram
-### Alur Proses
-- …
+```php
 
-### Diagram
-- (Activity / Sequence) …
+CLASS Pinjaman:
+    // Properti: $jumlah, $tenor, $cicilan
 
-## 6. Siklus Hidup Data & Evaluasi Desain
-### Siklus Hidup Data Utama
-- …
+CLASS PinjamanBuilder:
+    PRIVATE $pinjaman // Menyimpan objek yang sedang dibuat
+
+    METHOD reset() 
+        $this->pinjaman = NEW Pinjaman() // Buat objek Pinjaman baru
+
+    METHOD setJumlah(jumlah)
+        $this->pinjaman->jumlah = jumlah
+        RETURN $this // Mengizinkan chaining
+
+    METHOD hitungCicilan() // Langkah kompleks
+        // Logika: hitung cicilan berdasarkan jumlah dan tenor
+        $this->pinjaman->cicilan = (jumlah + bunga) / tenor
+        RETURN $this
+
+    METHOD getResult()
+        RETURN $this->pinjaman // Kembalikan objek yang sudah selesai
+
+// PENGGUNAAN:
+$builder = NEW PinjamanBuilder()
+
+$pinjamanBaru = $builder
+    ->setJumlah(5000000)
+    ->hitungCicilan() // Langkah 2 setelah setJumlah
+    ->getResult()
+
+```
+
+## 5. Sequence & Activity Diagram
+### Sequence Diagram
+- #### Simpanan
+<img src="Sequence-Simpanan.png" alt="Use Case Diagram" width="600"/>
+
+- #### Pinjaman
+<img src="Sequence-Pinjaman.png" alt="Use Case Diagram" width="600"/>
+
+- #### Angsuran
+<img src="Sequence-Angsuran.png" alt="Use Case Diagram" width="600"/>
+
+### Activity Diagram
+- #### Simpanan
+<img src="Activity-Simpanan.png" alt="Use Case Diagram" width="600"/>
+
+- #### Pinjaman
+<img src="Activity-Pinjaman.png" alt="Use Case Diagram" width="600"/>
+
+- #### Angsuran
+<img src="Activity-Angsuran.png" alt="Use Case Diagram" width="600"/>
+
+## 6. State Machine & Evaluasi Desain
+### State Machine
+<img src="State-Machine.png" alt="Use Case Diagram" width="600"/>
 
 ### Evaluasi Desain
-- Maintainable: …
-- Reusable: …
-- Extendable: …
+- Maintainable: Baik
+  - Pemodelan Domain yang Jelas (Class Diagram): Domain telah dipisah dengan baik menjadi entitas yang kohesif: Anggota, Pinjaman, Angsuran, Simpanan Master, dan Simpanan Detail. Setiap kelas memiliki tanggung jawab yang jelas.
+  - Open/Closed Principle (OCP): Penggunaan Factory Method memungkinkan penambahan jenis User baru (Admin, Supervisor) tanpa mengubah kode inti (UserFactory atau logika login).
+  - Penggunaan State Machine Diagram untuk alur Pinjaman menunjukkan manajemen lifecycle yang terstruktur.
+  - Separation of Concerns pada Transaksi: Pemisahan antara Simpanan Master (saldo total, data utama) dan Simpanan Detail (setiap transaksi) adalah praktik yang sangat baik. Ini memastikan penambahan atau pengubahan satu detail transaksi tidak memengaruhi integritas data Master secara langsung, mempermudah pelacakan dan auditing.
 
-### Usulan Fitur Masa Depan
-- …
+- Reusable: Baik
+  -  Pemisahan Simpanan: Pemisahan antara Simpanan Master dan Simpanan Detail memungkinkan modul lain hanya perlu berinteraksi dengan Simpanan Master (untuk saldo) atau Simpanan Detail (untuk laporan audit) tanpa memuat seluruh data.
 
-## Penutup
-…
+- Extendable: Baik
+  -  Normalisasi Data yang Baik: Struktur hubungan seperti 1-ke-Banyak (1:0..*) antara Anggota dan Pinjaman, dan antara Pinjaman dan Angsuran menunjukkan normalisasi data yang baik. Ini mengurangi redundansi data dan efisien untuk pertumbuhan data.
+
+### Saran Improvement Fitur Baru
+Membuat fitur untuk  meningkatkan transparansi dan komunikasi antara Koperasi dan Anggota melalui Pemberitahuan Otomatis
+Sistem secara otomatis mengirimkan notifikasi (email/SMS/in-app) mengenai status pengajuan pinjaman, jatuh tempo angsuran, atau laporan simpanan tahunan.
+Adapun manfaatnya:
+- Bagi Anggota:
+  -  Meningkatkan Transparansi: Anggota mendapat informasi status pinjaman dan transaksi simpanan secara real-time.
+  -  Peringatan jatuh tempo angsuran mengurangi risiko keterlambatan.
+  -  Meningkatkan Kenyamanan: Akses informasi cepat tanpa perlu kontak manual ke Pengurus.
+- Bagi Koperasi:
+  -  Menurunkan Risiko: Pengingat rutin mengurangi jumlah kredit macet/terlambat bayar.
+  -  Meningkatkan Efisiensi: Mengotomatisasi tugas pengiriman pesan yang sebelumnya dilakukan manual oleh Pengurus.
+  -  Membangun Citra: Koperasi terlihat modern, profesional, dan responsif.
+
+
+## Biodata
+-  #### Nama: Bayu Sebastian
+-  #### NIM: 2203200001
+-  #### Semester: VII (Tujuh)
+-  #### Prodi: Informatika
+-  #### Mata Kuliah: Rekayasa Perangkat Lunak
