@@ -29,10 +29,15 @@ Dengan adanya sistem koperasi simpan pinjam ini, diharapkan proses administrasi 
 
 ## 4. Prinsip SOLID & Design Patterns
 ### Prinsip SOLID yang Dipilih
-- …
+- Single Responsibility Principle (SRP)
+  Setiap class hanya punya satu tanggung jawab. Contoh: DatabaseManager hanya mengelola koneksi, UserFactory hanya membuat user, PinjamanBuilder hanya membangun objek pinjaman.
+- Open/Closed Principle (OCP)
+  Sistem dapat diperluas tanpa mengubah kode yang sudah ada. Misal: menambah role baru (UserAdmin) cukup tambahkan class dan Factory baru, tanpa mengubah UserFactory.
+- Dependency Inversion Principle (DIP)
+  AnggotaService tidak membuat dependency sendiri, tetapi menerima DatabaseManager dari luar, sehingga dependency bergantung pada abstraksi.
 
 ### Contoh Creational Design Patterns
-- Singleton: …
+- Singleton: 
 - Factory Method: …
 - Builder: …
 
