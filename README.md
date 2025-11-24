@@ -16,10 +16,16 @@ Dengan adanya sistem koperasi simpan pinjam ini, diharapkan proses administrasi 
 
 ## 3. Kelas-Kelas & Class Diagram
 ### Kelas Utama
-- …
+- User
+- Anggota
+- Pengurus
+- Pinjaman
+- Angsuran
+- Simpanan Master
+- Simpanan Detail
 
-### Hubungan Antar Kelas
-- …
+### Class Diagram
+<img src="Class-Diagram.png" alt="Use Case Diagram" width="600"/>
 
 ## 4. Prinsip SOLID & Design Patterns
 ### Prinsip SOLID yang Dipilih
