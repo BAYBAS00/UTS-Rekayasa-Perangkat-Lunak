@@ -37,7 +37,31 @@ Dengan adanya sistem koperasi simpan pinjam ini, diharapkan proses administrasi 
   AnggotaService tidak membuat dependency sendiri, tetapi menerima DatabaseManager dari luar, sehingga dependency bergantung pada abstraksi.
 
 ### Contoh Creational Design Patterns
-- Singleton: 
+- Singleton:
+  ```php
+class DatabaseManager {
+    private static $instance = null; // Penyimpan instance tunggal
+
+    private function __construct() {
+        // Konstruktor harus private
+        // Inisialisasi koneksi database hanya sekali
+    }
+
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new DatabaseManager(); // Buat instance jika belum ada
+        }
+        return self::$instance; // Selalu mengembalikan instance yang sama
+    }
+}
+
+// Penggunaan:
+$db1 = DatabaseManager::getInstance();
+$db2 = DatabaseManager::getInstance();
+
+// $db1 akan selalu sama dengan $db2
+```
+
 - Factory Method: …
 - Builder: …
 
