@@ -39,6 +39,7 @@ Dengan adanya sistem koperasi simpan pinjam ini, diharapkan proses administrasi 
 ### Contoh Creational Design Patterns
 - Singleton:
   ```php
+  
 class DatabaseManager {
     private static $instance = null; // Penyimpan instance tunggal
 
@@ -60,6 +61,7 @@ $db1 = DatabaseManager::getInstance();
 $db2 = DatabaseManager::getInstance();
 
 // $db1 akan selalu sama dengan $db2
+
   ```
 
 - Factory Method: …
